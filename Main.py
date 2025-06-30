@@ -1,6 +1,6 @@
 #Librerias
 import gymnasium as gym
-import flappy_bird_gymnasium
+from DQN import DQN
 
 
 """
@@ -22,28 +22,20 @@ import flappy_bird_gymnasium
 
 
 
+##----------------------------ENTORNO------------------------------------------
+
 env = gym.make("FlappyBird-v0", render_mode="human", use_lidar=True)
 
-state, _ = env.reset()
-total_reward = 0
-steps = 0
-episode = 0
 
-while True:
-
-    action = env.action_space.sample()
-
-    state, reward, terminated, _, info = env.step(action)
-
-    total_reward += reward
-    episode += 1
-    steps += 1
-
-    print("Episode:",episode," Total Reward:",total_reward," Steps:",steps)
-    
-
-    if terminated:
-        break
+num_states = env.observation_space.shape[0]
+num_actions = env.action_space.n
 
 
-env.close()
+DQN_Agent = DQN(num_states=num_states, num_actions=num_actions)
+
+#Entrenamiento
+train = DQN_Agent.entrenamiento(env=env,num_episodes=2000,epsilon_decay=0.9995,print_every=50)
+
+DQN_Agent.save_model('flappybird_qNetwork.keras')
+
+#-----------------------------------------------------------------------------
