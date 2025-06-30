@@ -24,7 +24,7 @@ from DQN import DQN
 
 
 
-##----------------------------ENTORNO------------------------------------------
+##---------------------------ENTORNO DE ENTRENAMIENTO------------------------------------------
 
 env = gym.make("FlappyBird-v0", render_mode="human", use_lidar=True)
 
@@ -35,13 +35,14 @@ num_actions = env.action_space.n
 
 DQN_Agent = DQN(num_states=num_states, num_actions=num_actions)
 
-#Cargar modelo (hay que tener un modelo primero)
 
-#PIPO= DQN_Agent.load_model('PIPO_Network.keras')
+#Cargar Modelo PIPO
+PIPO= DQN_Agent.load_model('PIPO_Network.keras')
 
 #Entrenamiento
-#train = PIPO.entrenamiento(env=env,num_episodes=3000,epsilon_decay=0.9995,print_every=50)
-train = DQN_Agent.entrenamiento(env=env,num_episodes=3000,epsilon_decay=0.9995,print_every=50)
+train = PIPO.entrenamiento(env=env,num_episodes=3000,epsilon_decay=0.995,print_every=50)
 
 
-#-----------------------------------------------------------------------------
+#--------------------------------------------------------------------------------
+
+#----------------------------NEURONA ENTRENADA----------------------------------

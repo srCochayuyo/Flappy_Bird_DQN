@@ -30,7 +30,6 @@ class DQN:
     #------------------RED NEURONAL------------------
 
     def build_q_network(self,num_states, num_actions):
-        tf.random.set_seed(0)
         q_network = tf.keras.Sequential()
         q_network.add(tf.keras.layers.Input(shape=[num_states]))
         q_network.add(tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.001)))
@@ -47,9 +46,8 @@ class DQN:
             
         else:
             q_values= self.q_network(state)
-            action = np.argmax(q_values)
+            action = np.argmax(q_values,axis=1)[0]
             
-
         return action
     
 
@@ -107,7 +105,7 @@ class DQN:
 
     #--------------------------Entrenamiento-----------------------------
     
-    def entrenamiento(self,env,num_episodes=2000,batch_size=64,gamma=0.99,epsilon=1,epsilon_min=0.05,epsilon_decay=0.9995,update_target_episode=100, print_every=50):
+    def entrenamiento(self,env,num_episodes=3000,batch_size=32,gamma=0.99,epsilon=1,epsilon_min=0.01,epsilon_decay=0.995,update_target_episode=10, print_every=50):
 
         epsilon = epsilon
         accumulate_reward = 0
@@ -158,6 +156,7 @@ class DQN:
         
     
     #---------------------Guardado y carga del modelo-------------------------------
+
     def save_model(self, filepath):
        
         self.q_network.save(filepath)
@@ -168,6 +167,8 @@ class DQN:
 
         self.q_target_network = self.build_q_network(self.num_states, self.num_actions)
         self.q_target_network.set_weights(self.q_network.get_weights())
+
+        return self
 
 
 
