@@ -1,6 +1,8 @@
 #Librerias
 import gymnasium as gym
+import flappy_bird_gymnasium
 from DQN import DQN
+
 
 
 """

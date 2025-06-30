@@ -20,7 +20,7 @@ class DQN:
         self.q_target_network = self.build_q_network(num_states, num_actions)
 
         #Inicializar red objetvio
-        self.q_target_network.set_wights(self.q_network.get_weights())
+        self.q_target_network.set_weights(self.q_network.get_weights())
 
         #Optimizador
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
@@ -30,7 +30,7 @@ class DQN:
     #------------------RED NEURONAL------------------
 
     def build_q_network(self,num_states, num_actions):
-        tf.random.set.seed(0)
+        tf.random.set_seed(0)
         q_network = tf.keras.Sequential()
         q_network.add(tf.keras.layers.Input(shape=[num_states]))
         q_network.add(tf.keras.layers.Dense(32, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.001)))
@@ -62,12 +62,12 @@ class DQN:
         self.optimizer.apply_gradients(zip(gradients,self.q_network.trainable_variables))   
         
 
-    def experenciaRepeticion(self,buffer, batch_size, gamma):
+    def experenciaRepeticion(self, batch_size, gamma):
 
-        if len(buffer) <= batch_size:
+        if len(self.buffer) <= batch_size:
             return
         
-        minibatch = np.array(random.sample(buffer, batch_size), dtype='object')
+        minibatch = np.array(random.sample(self.buffer, batch_size), dtype='object')
 
         states = np.vstack(minibatch[:,0])
 
@@ -120,7 +120,7 @@ class DQN:
 
             while not done:
 
-                action = self.epsilon_greedy(np.array([state]), epsilon)
+                action = self.greedy(np.array([state]), epsilon)
 
                 next_state, reward , terminated,_, info = env.step(action)
                 done = terminated
