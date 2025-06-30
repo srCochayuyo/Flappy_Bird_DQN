@@ -9,7 +9,7 @@ class DQN:
 
     #------------------CONSTRUCTOR------------------
 
-    #TODO: averigurar con que rellenarlo XD
+
     def __init__(self,num_states,num_actions,learning_rate=0.001, buffer_size=10000):
         self.num_states = num_states
         self.num_actions = num_actions
@@ -33,8 +33,8 @@ class DQN:
         tf.random.set_seed(0)
         q_network = tf.keras.Sequential()
         q_network.add(tf.keras.layers.Input(shape=[num_states]))
-        q_network.add(tf.keras.layers.Dense(32, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.001)))
-        q_network.add(tf.keras.layers.Dense(32, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.001)))
+        q_network.add(tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.001)))
+        q_network.add(tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.001)))
         q_network.add(tf.keras.layers.Dense(num_actions, activation='linear'))
         return q_network
 
@@ -44,9 +44,11 @@ class DQN:
     def greedy(self,state, epsilon):
         if np.random.rand() < epsilon:
             action = np.random.randint(self.num_actions)
+            
         else:
             q_values= self.q_network(state)
             action = np.argmax(q_values)
+            
 
         return action
     
@@ -89,12 +91,11 @@ class DQN:
 
         q_values = tf.convert_to_tensor(q_values)
 
-        self.actualizacionParametros(states, q_values, self.q_network, self.optimizer)
+        self.actualizacionParametros(states, q_values)
 
 
     def add_experience(self, state, action, reward, next_state, done):
-        
-        self.buffer.append((np.array([state]), action, reward, np.array([next_state]), done))
+        self.buffer.append((state, action, reward, next_state, done))
 
 
     def update_target_network(self):
@@ -106,7 +107,7 @@ class DQN:
 
     #--------------------------Entrenamiento-----------------------------
     
-    def entrenamiento(self,env,num_episodes=2000,batch_size=64,gamma=0.99,epsilon=1,epsilon_min=0.01,epsilon_decay=0.995,update_target_episode=100, print_every=50):
+    def entrenamiento(self,env,num_episodes=2000,batch_size=64,gamma=0.99,epsilon=1,epsilon_min=0.05,epsilon_decay=0.9995,update_target_episode=100, print_every=50):
 
         epsilon = epsilon
         accumulate_reward = 0
@@ -129,19 +130,19 @@ class DQN:
 
                 self.add_experience(state,action,reward,next_state,done)
 
-                total_reward += 1
+                total_reward += reward
 
                 self.experenciaRepeticion(batch_size, gamma)
 
-                if steps % update_target_episode == 0:
+                if episode % update_target_episode == 0:
                     self.update_target_network()
 
-                state = next = state
+                state = next_state
 
             epsilon = max(epsilon_min,epsilon*epsilon_decay)
 
             accumulate_reward += total_reward
-            average_reward = accumulate_reward
+            average_reward = accumulate_reward / episode
             episode_rewards.append((episode,total_reward))
 
             if episode % print_every == 0:
@@ -149,8 +150,11 @@ class DQN:
                       f"Average reward: {average_reward:.3f} | Steps: {steps} | "
                       f"Epsilon: {epsilon:.3f}")
                 
-            env.close()
-            return episode_rewards
+        env.close()
+
+        self.save_model('PIPO_Network.keras')
+
+        return episode_rewards
         
     
     #---------------------Guardado y carga del modelo-------------------------------
